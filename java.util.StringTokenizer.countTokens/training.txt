@@ -1,0 +1,50 @@
+# ParseUtilities.java
+# https://github.com/apache/chukwa/blob/38742d250275529d07c1ff4f912a29b73a5985fb/core/src/main/java/org/apache/hadoop/chukwa/analysis/salsa/fsm/ParseUtilities.java
+# Line 28
+public static FSMIntermedEntry splitChukwaRecordKey
+		(String origkey, FSMIntermedEntry rec, String delim) 
+		throws Exception
+	{
+		StringTokenizer st = new StringTokenizer(origkey, delim);
+		if (st.countTokens() != 3) {
+			throw new Exception("Expected 3 tokens from ChukwaRecordKey but only found " + st.countTokens() + ".");
+		}
+		rec.time_orig_epoch = st.nextToken();
+		rec.job_id = st.nextToken();
+		rec.time_orig = st.nextToken();
+		return rec;
+	}
+
+# CrailUtils.java
+# https://github.com/apache/incubator-crail/blob/d07249a028818203ef0e07d400c9415f483143de/client/src/main/java/org/apache/crail/utils/CrailUtils.java
+# Line 249
+public static void parseMap(String config, ConcurrentHashMap<String, String> map) throws Exception {
+  StringTokenizer tupleTokenizer = new StringTokenizer(config, "/");
+  while(tupleTokenizer.hasMoreTokens()){
+    String tuple = tupleTokenizer.nextToken();
+    StringTokenizer commaTokenizer = new StringTokenizer(tuple, ",");
+    if (commaTokenizer.countTokens() != 2){
+      throw new Exception("parsing Map, wrong format!");
+    }
+    String key = commaTokenizer.nextToken();
+    String value = commaTokenizer.nextToken();
+    map.put(key, value);
+  }
+}
+
+
+# ServiceTree.java
+# https://github.com/apache/uima-uimaj/blob/4e3eb198d2394e58df7e1a27464b4d0ff7e438ec/jVinci/src/main/java/org/apache/vinci/transport/vns/service/ServiceTree.java
+# Line 66
+public Object find(String s) {
+  StringTokenizer str = new StringTokenizer(s, ".");
+  ServiceTree at = this;
+  while (str.countTokens() != 0) {
+    at = (ServiceTree) at.children.get(str.nextToken());
+    if (at == null) {
+      return null;
+    }
+  }
+
+  return at.value;
+}

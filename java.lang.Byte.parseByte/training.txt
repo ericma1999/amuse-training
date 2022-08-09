@@ -1,0 +1,15 @@
+
+
+# VarcharOperators.java
+# https://github.com/prestodb/presto/blob/master/presto-main/src/main/java/com/facebook/presto/type/VarcharOperators.java#L215
+# Line 218
+
+    public static long castToTinyint(@SqlType("varchar(x)") Slice slice)
+    {
+        try {
+            return Byte.parseByte(slice.toStringUtf8());
+        }
+        catch (Exception e) {
+            throw new PrestoException(INVALID_CAST_ARGUMENT, format("Cannot cast '%s' to TINYINT", slice.toStringUtf8()));
+        }
+    }

@@ -1,0 +1,123 @@
+
+# Utils.java
+# https://github.com/alibaba/druid/blob/master/src/main/java/com/alibaba/druid/util/Utils.java#L133
+# 164
+public static String toString(java.util.Date date) {
+    if (date == null) {
+        return null;
+    }
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            .format(date);
+}
+
+# DateUtil.java 
+# https://github.com/gocd/gocd/blob/cc84e2045638e8afca741a016f4c02e727efe807/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/notification/v4/DateUtil.java
+# 26
+public static String dateToString(Date date) {
+    if (date != null) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
+        simpleDateFormat.setTimeZone(UTC);
+        return simpleDateFormat.format(date);
+    }
+
+    return "";
+}
+
+# BusinessCalendarImpl.java
+# https://github.com/kiegroup/jbpm/blob/main/jbpm-flow/src/main/java/org/jbpm/process/core/timer/BusinessCalendarImpl.java#L350
+# Line 336
+protected List<TimePeriod> parseHolidays() {
+    String holidaysString = businessCalendarConfiguration.getProperty(HOLIDAYS);
+    List<TimePeriod> holidays = new ArrayList<TimePeriod>();
+    int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+    if (holidaysString != null) {
+        String[] hPeriods = holidaysString.split(",");
+        SimpleDateFormat sdf = new SimpleDateFormat(businessCalendarConfiguration.getProperty(HOLIDAY_DATE_FORMAT, "yyyy-MM-dd"));
+        for (String hPeriod : hPeriods) {
+            boolean addNextYearHolidays = false;
+            
+            String[] fromTo = hPeriod.split(":");
+            if (fromTo[0].startsWith("*")) {
+                addNextYearHolidays = true;
+                
+                fromTo[0] = fromTo[0].replaceFirst("\\*", currentYear+"");
+            }
+            try {
+                if (fromTo.length == 2) {
+                    Calendar tmpFrom = new GregorianCalendar();
+                    if (timezone != null) {
+                        tmpFrom.setTimeZone(TimeZone.getTimeZone(timezone));
+                    }
+                    tmpFrom.setTime(sdf.parse(fromTo[0]));
+
+                    if (fromTo[1].startsWith("*")) {
+                        
+                        fromTo[1] = fromTo[1].replaceFirst("\\*", currentYear+"");
+                    }
+                    
+                    Calendar tmpTo = new GregorianCalendar();
+                    if (timezone != null) {
+                        tmpTo.setTimeZone(TimeZone.getTimeZone(timezone));
+                    }
+                    tmpTo.setTime(sdf.parse(fromTo[1]));
+                    Date from = tmpFrom.getTime();
+                    
+                    
+                    tmpTo.add(Calendar.DAY_OF_YEAR, 1);
+                    
+                    if ((tmpFrom.get(Calendar.MONTH) > tmpTo.get(Calendar.MONTH)) && (tmpFrom.get(Calendar.YEAR) == tmpTo.get(Calendar.YEAR))) {
+                        tmpTo.add(Calendar.YEAR, 1);
+                    }
+                    
+                    Date to = tmpTo.getTime();
+                    holidays.add(new TimePeriod(from, to));
+                    
+                    holidays.add(new TimePeriod(from, to));
+                    if (addNextYearHolidays) {
+                        tmpFrom = new GregorianCalendar();
+                        if (timezone != null) {
+                            tmpFrom.setTimeZone(TimeZone.getTimeZone(timezone));
+                        }
+                        tmpFrom.setTime(sdf.parse(fromTo[0]));
+                        tmpFrom.add(Calendar.YEAR, 1);
+                        
+                        from = tmpFrom.getTime();
+                        tmpTo = new GregorianCalendar();
+                        if (timezone != null) {
+                            tmpTo.setTimeZone(TimeZone.getTimeZone(timezone));
+                        }
+                        tmpTo.setTime(sdf.parse(fromTo[1]));
+                        tmpTo.add(Calendar.YEAR, 1);
+                        tmpTo.add(Calendar.DAY_OF_YEAR, 1);
+                        
+                        if ((tmpFrom.get(Calendar.MONTH) > tmpTo.get(Calendar.MONTH)) && (tmpFrom.get(Calendar.YEAR) == tmpTo.get(Calendar.YEAR))) {
+                            tmpTo.add(Calendar.YEAR, 1);
+                        }
+                        
+                        to = tmpTo.getTime();
+                        holidays.add(new TimePeriod(from, to));
+                    }
+                } else {
+                    
+                    Calendar c = new GregorianCalendar();
+                    c.setTime(sdf.parse(fromTo[0]));
+                    c.add(Calendar.DAY_OF_YEAR, 1);
+                    // handle one day holiday
+                    holidays.add(new TimePeriod(sdf.parse(fromTo[0]), c.getTime()));
+                    if (addNextYearHolidays) {
+                        Calendar tmp = Calendar.getInstance();
+                        tmp.setTime(sdf.parse(fromTo[0]));
+                        tmp.add(Calendar.YEAR, 1);
+                        
+                        Date from = tmp.getTime();
+                        c.add(Calendar.YEAR, 1);
+                        holidays.add(new TimePeriod(from, c.getTime()));
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error while parsing holiday in business calendar", e);
+            }
+        }
+    }
+    return holidays;
+} 

@@ -1,0 +1,37 @@
+
+
+
+# ThreadContextImplementation.java
+# https://github.com/naver/ngrinder/blob/develop/ngrinder-runtime/src/main/java/net/grinder/engine/process/ThreadContextImplementation.java
+# Line 138
+
+	void setTestLogMarker(Marker marker) {
+		if (m_testMarker != null) {
+			m_threadMarker.remove(m_testMarker);
+		}
+
+		m_testMarker = marker;
+
+		if (marker != null) {
+			m_threadMarker.add(marker);
+		}
+	}
+
+
+# ThreadContextImplementation.java 
+# https://github.com/naver/ngrinder/blob/ef6d5adfe4965e327b35a8d44b0eecfe5dbe1cde/ngrinder-runtime/src/main/java/net/grinder/engine/process/ThreadContextImplementation.java
+# Line 122
+public void setCurrentRunNumber(int run) {
+	if (m_runMarker != null) {
+		m_threadMarker.remove(m_runMarker);
+		MarkerFactory.getIMarkerFactory().detachMarker(
+				m_runMarker.getName());
+	}
+
+	if (run != -1) {
+		m_runMarker = MarkerFactory.getMarker("run-" + run);
+		m_threadMarker.add(m_runMarker);
+	}
+
+	m_runNumber = run;
+}

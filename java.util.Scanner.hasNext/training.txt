@@ -1,0 +1,88 @@
+
+
+# OpenIdAuthorizer.java
+# https://github.com/apache/iotdb/blob/8c5bef7c59f4a9b70c74e65b9c5f266da7668245/server/src/main/java/org/apache/iotdb/db/auth/authorizer/OpenIdAuthorizer.java
+# Line 110
+private static JSONObject getProviderRSAJWK(InputStream is) throws ParseException {
+  // Read all data from stream
+  StringBuilder sb = new StringBuilder();
+  try (Scanner scanner = new Scanner(is)) {
+    while (scanner.hasNext()) {
+      sb.append(scanner.next());
+    }
+  }
+
+  // Parse the data as json
+  String jsonString = sb.toString();
+  JSONObject json = JSONObjectUtils.parse(jsonString);
+
+  // Find the RSA signing key
+  JSONArray keyList = (JSONArray) json.get("keys");
+  for (Object key : keyList) {
+    JSONObject k = (JSONObject) key;
+    if (k.get("use").equals("sig") && k.get("kty").equals("RSA")) {
+      return k;
+    }
+  }
+  return null;
+}
+
+
+# ProcessInformations.java
+# https://github.com/javamelody/javamelody/blob/master/javamelody-core/src/main/java/net/bull/javamelody/internal/model/ProcessInformations.java#L115
+# Line 115
+public static List<ProcessInformations> buildProcessInformations(InputStream in,
+    boolean windows, boolean macOrAix) {
+  final String charset;
+  if (windows) {
+    charset = "Cp1252";
+  } else {
+    charset = "UTF-8";
+  }
+  final Scanner sc = new Scanner(in, charset);
+  sc.useRadix(10);
+  sc.useLocale(Locale.US);
+  sc.nextLine();
+  if (windows) {
+    sc.nextLine();
+    sc.nextLine();
+  }
+
+  final List<ProcessInformations> processInfos = new ArrayList<>();
+  while (sc.hasNext()) {
+    final ProcessInformations processInfo = new ProcessInformations(sc, windows, macOrAix);
+    processInfos.add(processInfo);
+  }
+  return Collections.unmodifiableList(processInfos);
+}
+
+
+# Volatile.java
+# https://github.com/crossoverJie/JCSprout/blob/master/src/main/java/com/crossoverjie/concurrent/Volatile.java#L23
+# Line 23
+public static void main(String[] args) throws InterruptedException {
+    Volatile aVolatile = new Volatile();
+    new Thread(aVolatile,"thread A").start();
+
+
+    System.out.println("main 线程正在运行") ;
+
+    Scanner sc = new Scanner(System.in);
+    while(sc.hasNext()){
+        String value = sc.next();
+        if(value.equals("1")){
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    aVolatile.stopThread();
+                }
+            }).start();
+
+            break ;
+        }
+    }
+
+    System.out.println("主线程退出了！");
+
+}

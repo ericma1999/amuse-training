@@ -1,0 +1,50 @@
+# ChannelOutputStream.java
+# https://github.com/neo4j/neo4j/blob/3.5/community/io/src/test/java/org/neo4j/test/impl/ChannelOutputStream.java#L57
+# Line 57
+public void write( byte[] b, int off, int len ) throws IOException
+{
+    int written = 0;
+    int index = off;
+    while ( written < len )
+    {
+        buffer.clear();
+        buffer.put( b, index + written, Math.min( len - written, buffer.capacity() ) );
+        buffer.flip();
+        written += channel.write( buffer );
+    }
+}
+
+
+# AppendOnlyValuesContainer.java
+# https://github.com/neo4j/neo4j/blob/3.5/community/kernel/src/main/java/org/neo4j/kernel/impl/api/state/AppendOnlyValuesContainer.java#L670
+# Line 670
+ByteBuffer write( Value value )
+{
+    checkState( buf != null, "Writer is closed" );
+    try
+    {
+        buf.clear();
+        buf.put( (byte) ValueType.forValue( value ).ordinal() );
+        value.writeTo( this );
+        buf.flip();
+        return buf;
+    }
+    catch ( BufferOverflowException e )
+    {
+        final int newSize = buf.capacity() * 2;
+        bufMemory.free();
+        allocateBuf( newSize );
+        return write( value );
+    }
+}
+
+# LettuceReactiveRedisConnection.java
+# https://github.com/spring-projects/spring-data-redis/blob/c0821be37f09b5673235d340fc0fa92a265c6823/src/main/java/org/springframework/data/redis/connection/lettuce/LettuceReactiveRedisConnection.java
+# Line 250
+public ByteBuffer decodeKey(ByteBuffer bytes) {
+
+  ByteBuffer buffer = ByteBuffer.allocate(bytes.remaining());
+  buffer.put(bytes);
+  buffer.flip();
+  return buffer;
+}

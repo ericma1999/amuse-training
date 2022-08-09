@@ -1,0 +1,50 @@
+
+
+# DocumentFile.java
+# https://github.com/pmd/pmd/blob/master/pmd-core/src/main/java/net/sourceforge/pmd/document/DocumentFile.java#L49
+# Line 51
+private void mapLinesToOffsets() throws IOException {
+    try (Scanner scanner = new Scanner(filePath)) {
+        int currentGlobalOffset = 0;
+
+        while (scanner.hasNextLine()) {
+            lineToOffset.add(currentGlobalOffset);
+            currentGlobalOffset += getLineLengthWithLineSeparator(scanner);
+        }
+    }
+}
+
+
+# TTable.java
+# https://github.com/apache/dubbo/blob/master/dubbo-plugin/dubbo-qos/src/main/java/org/apache/dubbo/qos/textui/TTable.java#L412
+# Line 420
+private static int width(String string) {
+    int maxWidth = 0;
+    try (Scanner scanner = new Scanner(new StringReader(string))) {
+        while (scanner.hasNextLine()) {
+            maxWidth = max(length(scanner.nextLine()), maxWidth);
+        }
+    }
+    return maxWidth;
+}
+
+
+
+# CliCommands.java
+# https://github.com/javaee-samples/javaee7-samples/blob/master/test-utils/src/main/java/org/javaee7/CliCommands.java#L89
+# Line 94
+
+public static Process readAllInput(List<String> output, Process process) {
+    // Read any output from the process
+    try (Scanner scanner = new Scanner(process.getInputStream())) {
+        while (scanner.hasNextLine()) {
+            String nextLine = scanner.nextLine();
+            System.out.println(nextLine);
+            if (output != null) {
+                output.add(nextLine);
+            }
+        }
+    }
+    
+    return process;
+}

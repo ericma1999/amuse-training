@@ -1,0 +1,62 @@
+
+# XMLUtils.java
+# https://github.com/jenkinsci/jenkins/blob/master/core/src/main/java/jenkins/util/xml/XMLUtils.java#L200
+# Line 244
+private static void _transform(Source source, Result out) throws TransformerException {
+    TransformerFactory factory = TransformerFactory.newInstance();
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+    // this allows us to use UTF-8 for storing data,
+    // plus it checks any well-formedness issue in the submitted data.
+    Transformer t = factory.newTransformer();
+    t.transform(source, out);
+}
+
+
+# WadlGenerator.java
+# https://github.com/apache/cxf/blob/main/rt/rs/description/src/main/java/org/apache/cxf/jaxrs/model/wadl/WadlGenerator.java#L1295
+# Line 1299
+private String copyDOMToString(Document wadlDoc) throws Exception {
+    DOMSource domSource = new DOMSource(wadlDoc);
+    // temporary workaround
+    StringWriter stringWriter = new StringWriter();
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    transformerFactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    try {
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+    } catch (IllegalArgumentException ex) {
+        // ignore
+    }
+
+    Transformer transformer = transformerFactory.newTransformer();
+    transformer.transform(domSource, new StreamResult(stringWriter));
+    return stringWriter.toString();
+}
+
+
+# MigratePortfoliosToNewTables.java
+# https://github.com/SonarSource/sonarqube/blob/e6b8b9337e494224c278ab53efdd7722cedad809/server/sonar-db-migration/src/main/java/org/sonar/server/platform/db/migration/version/v91/MigratePortfoliosToNewTables.java
+# Line 421
+private static void validate(String xml) throws IOException, SAXException, ParserConfigurationException {
+    // Replace bare, namespace unaware header with fully qualified header (with schema declaration)
+    String fullyQualifiedXml = VIEWS_HEADER_BARE_PATTERN.matcher(xml).replaceFirst(VIEWS_HEADER_FQ);
+    try (InputStream xsd = MigratePortfoliosToNewTables.class.getResourceAsStream(SCHEMA_VIEWS)) {
+    InputSource viewsDefinition = new InputSource(new InputStreamReader(toInputStream(fullyQualifiedXml, UTF_8), UTF_8));
+
+    SchemaFactory saxSchemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    saxSchemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+    saxSchemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+
+    SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+    parserFactory.setFeature(FEATURE_SECURE_PROCESSING, true);
+    parserFactory.setNamespaceAware(true);
+    parserFactory.setSchema(saxSchemaFactory.newSchema(new SAXSource(new InputSource(xsd))));
+
+    SAXParser saxParser = parserFactory.newSAXParser();
+    saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    saxParser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+    saxParser.parse(viewsDefinition, new ViewsValidator());
+    }
+}
+

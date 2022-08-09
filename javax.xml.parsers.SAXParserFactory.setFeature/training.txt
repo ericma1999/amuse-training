@@ -1,0 +1,56 @@
+# XMLParserFactoryProducer.java
+# https://github.com/pentaho/pentaho-kettle/blob/master/core/src/main/java/org/pentaho/di/core/xml/XMLParserFactoryProducer.java#L57
+# Line 80
+public static SAXParserFactory createSecureSAXParserFactory()
+  throws SAXNotSupportedException, SAXNotRecognizedException, ParserConfigurationException {
+  SAXParserFactory factory = SAXParserFactory.newInstance();
+  factory.setFeature( FEATURE_SECURE_PROCESSING, true );
+  factory.setFeature( "http://xml.org/sax/features/external-general-entities", false );
+  factory.setFeature( "http://xml.org/sax/features/external-parameter-entities", false );
+  factory.setFeature( "http://apache.org/xml/features/nonvalidating/load-external-dtd", false );
+  factory.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", true );
+
+  return factory;
+}
+
+# XmlParserFactoryProducer.java
+# https://github.com/pentaho/mondrian/blob/master/mondrian/src/main/java/mondrian/util/XmlParserFactoryProducer.java#L57
+# Line 71
+public static SAXParserFactory createSecureSAXParserFactory()
+        throws SAXNotSupportedException, SAXNotRecognizedException,
+        ParserConfigurationException
+{
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    return factory;
+}
+
+# XMLConverUtil.java
+# https://github.com/liyiorg/weixin-popular/blob/2.8.x/src/main/java/weixin/popular/util/XMLConverUtil.java#L98
+# Line 110
+public static <T> T convertToObject(Class<T> clazz, Reader reader) {
+  try {
+    /**
+      * XXE 漏洞
+      * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Prevention_Cheat_Sheet#JAXB_Unmarshaller
+      */
+    SAXParserFactory spf = SAXParserFactory.newInstance();
+    spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+    if (!JAXB_CONTEXT_MAP.containsKey(clazz)) {
+      JAXB_CONTEXT_MAP.put(clazz, JAXBContext.newInstance(clazz));
+    }
+
+    Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(reader));
+    Unmarshaller unmarshaller = JAXB_CONTEXT_MAP.get(clazz).createUnmarshaller();
+    return (T) unmarshaller.unmarshal(xmlSource);
+  } catch (Exception e) {
+    logger.error("", e);
+  }
+  return null;
+}

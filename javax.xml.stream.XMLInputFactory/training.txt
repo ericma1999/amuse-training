@@ -1,0 +1,10 @@
+
+# XmlUtils.java
+# https://github.com/aws/aws-sdk-java/blob/master/aws-java-sdk-core/src/main/java/com/amazonaws/util/XmlUtils.java#L57
+# Line 68
+private static XMLInputFactory createXmlInputFactory() {
+    XMLInputFactory factory = XMLInputFactory.newInstance();
+    factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+    factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+    return factory;
+}

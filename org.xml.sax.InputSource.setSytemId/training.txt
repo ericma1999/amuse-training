@@ -1,0 +1,55 @@
+
+
+# SaxResourceUtils.java
+# https://github.com/spring-projects/spring-framework/blob/b595dc1dfad9db534ca7b9e8f46bb9926b88ab5a/spring-oxm/src/main/java/org/springframework/oxm/support/SaxResourceUtils.java
+# Line 44
+public static InputSource createInputSource(Resource resource) throws IOException {
+  InputSource inputSource = new InputSource(resource.getInputStream());
+  inputSource.setSystemId(getSystemId(resource));
+  return inputSource;
+}
+
+
+# SAXParser.java
+# https://github.com/robovm/robovm/blob/ef091902377c00dc0fb2db87e8d79c8afb5e9010/rt/libcore/luni/src/main/java/javax/xml/parsers/SAXParser.java
+# Line 152
+public void parse(
+    InputStream is,
+    HandlerBase hb,
+    String systemId)
+    throws SAXException, IOException {
+    if (is == null) {
+        throw new IllegalArgumentException("InputStream cannot be null");
+    }
+
+    InputSource input = new InputSource(is);
+    input.setSystemId(systemId);
+    this.parse(input, hb);
+}
+
+
+# TaglibFactory.java
+# https://github.com/apache/freemarker/blob/201533eb7c15e3cfc55b38da37f730a3492bec0f/src/main/java/freemarker/ext/jsp/TaglibFactory.java
+# Line 861
+private static void parseXml(InputStream in, String systemId, DefaultHandler handler)
+        throws SAXException, IOException {
+    InputSource inSrc = new InputSource();
+    inSrc.setSystemId(systemId);
+    inSrc.setByteStream(toCloseIgnoring(in));
+    
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setNamespaceAware(false);
+    factory.setValidating(false); // Especially as we use dummy empty DTD-s
+    XMLReader reader;
+    try {
+        reader = factory.newSAXParser().getXMLReader();
+    } catch (ParserConfigurationException e) {
+        // Not expected
+        throw new RuntimeException("XML parser setup failed", e);
+    }
+    reader.setEntityResolver(new EmptyContentEntityResolver()); // To deal with referred DTD-s
+    reader.setContentHandler(handler);
+    reader.setErrorHandler(handler);
+    
+    reader.parse(inSrc);
+}

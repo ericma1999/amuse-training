@@ -1,0 +1,82 @@
+
+# Literal.java
+# https://github.com/spring-projects/spring-framework/blob/b595dc1dfad9db534ca7b9e8f46bb9926b88ab5a/spring-expression/src/main/java/org/springframework/expression/spel/ast/Literal.java
+# Line 87
+public static Literal getLongLiteral(String numberToken, int startPos, int endPos, int radix) {
+  try {
+    long value = Long.parseLong(numberToken, radix);
+    return new LongLiteral(numberToken, startPos, endPos, value);
+  }
+  catch (NumberFormatException ex) {
+    throw new InternalParseException(new SpelParseException(startPos, ex, SpelMessage.NOT_A_LONG, numberToken));
+  }
+}
+
+
+
+# JournalBasedTokenStateService.java
+# https://github.com/apache/knox/blob/53849ac45757a8b915dec3ff912a5e7e7665f18a/gateway-server/src/main/java/org/apache/knox/gateway/services/token/impl/JournalBasedTokenStateService.java
+# Line 40
+public void init(final GatewayConfig config, final Map<String, String> options) throws ServiceLifecycleException {
+    super.init(config, options);
+
+    try {
+        // Initialize the token state journal
+        journal = TokenStateJournalFactory.create(config);
+
+        // Load any persisted journal entries, and add them to the in-memory collection
+        List<JournalEntry> entries = journal.get();
+        for (JournalEntry entry : entries) {
+            String id = entry.getTokenId();
+            try {
+                long issueTime   = Long.parseLong(entry.getIssueTime());
+                long expiration  = Long.parseLong(entry.getExpiration());
+                long maxLifetime = Long.parseLong(entry.getMaxLifetime());
+
+                // Add the token state to memory
+                super.addToken(id, issueTime, expiration, maxLifetime);
+
+            } catch (Exception e) {
+                log.failedToLoadJournalEntry(Tokens.getTokenIDDisplayText(id), e);
+            }
+        }
+    } catch (IOException e) {
+        throw new ServiceLifecycleException("Failed to load persisted state from the token state journal", e);
+    }
+}
+
+# CacheBuilderSpec.java
+# https://github.com/google/guava/blob/master/guava/src/com/google/common/cache/CacheBuilderSpec.java#L305
+# Line 421
+public void parse(CacheBuilderSpec spec, String key, @CheckForNull String value) {
+  if (isNullOrEmpty(value)) {
+    throw new IllegalArgumentException("value of key " + key + " omitted");
+  }
+  try {
+    char lastChar = value.charAt(value.length() - 1);
+    TimeUnit timeUnit;
+    switch (lastChar) {
+      case 'd':
+        timeUnit = TimeUnit.DAYS;
+        break;
+      case 'h':
+        timeUnit = TimeUnit.HOURS;
+        break;
+      case 'm':
+        timeUnit = TimeUnit.MINUTES;
+        break;
+      case 's':
+        timeUnit = TimeUnit.SECONDS;
+        break;
+      default:
+        throw new IllegalArgumentException(
+            format("key %s invalid unit: was %s, must end with one of [dhms]", key, value));
+    }
+
+    long duration = Long.parseLong(value.substring(0, value.length() - 1));
+    parseDuration(spec, duration, timeUnit);
+  } catch (NumberFormatException e) {
+    throw new IllegalArgumentException(
+        format("key %s value set to %s, must be integer", key, value));
+  }
+}
